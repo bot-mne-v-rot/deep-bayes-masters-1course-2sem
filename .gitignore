@@ -1,0 +1,14 @@
+*.aux
+*.fls
+*.log
+*.fdb_latexmk
+*.synctex.gz
+*.toc
+*.upa
+*.upb
+*.pdf
+**/.DS_Stores
+**.idx
+**.ilg
+**.ind
+**.out

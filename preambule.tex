@@ -1,0 +1,245 @@
+\documentclass[a4paper]{article}
+
+%plastikovye pakety
+
+\usepackage[12pt]{extsizes}
+\usepackage[utf8]{inputenc}
+\usepackage[unicode, pdftex]{hyperref}
+\usepackage{cmap}
+\usepackage{textcomp}
+\usepackage{mathtext}
+\usepackage{multicol}
+\setlength{\columnsep}{1cm}
+\usepackage[T2A]{fontenc}
+%\usepackage[english,russian]{babel}
+\usepackage[english]{babel}
+\usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools}
+\usepackage{icomma}
+\usepackage{euscript}
+\usepackage{mathrsfs}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[left=2cm,right=2cm,
+    top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage[normalem]{ulem}
+\usepackage{graphicx}
+\usepackage{makeidx}
+\usepackage{extarrows}
+\usepackage[shortlabels]{enumitem}
+\usepackage{listings}
+\makeindex
+\graphicspath{{pictures/}}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+%\usepackage[usenames]{color}
+\hypersetup{
+     colorlinks=true,
+     linkcolor=coralpink,
+     filecolor=coralpink,
+     citecolor=black,      
+     urlcolor=coralpink,
+     }
+%\usepackage{fancyhdr}
+%\pagestyle{fancy} 
+%    \fancyhead{} 
+%    \fancyhead[RO]{
+%        \includegraphics[width = 0.\textwidth]{shilat.jpeg}
+%} 
+%\fancyhead[CO]{ }
+%\fancyhead[LO]{keba4ok} 
+\newtheoremstyle{indented}{0 pt}{0 pt}{\itshape}{}{\bfseries}{. }{0 em}{ }
+\renewcommand\thesection{}
+\renewcommand\thesubsection{}
+\renewcommand\thesubsubsection{}
+%\geometry{verbose,a4paper,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=1.5cm}
+
+%\renewcommand{\boxed}[1]{\text{\fboxsep=.2em\fbox{\m@th$\displaystyle#1$}}}
+
+%declarations
+%arrows_shorten
+\DeclareMathOperator{\la}{\leftarrow}
+\DeclareMathOperator{\ra}{\rightarrow}
+\DeclareMathOperator{\lra}{\leftrightarrow}
+\DeclareMathOperator{\llra}{\longleftrightarrow}
+\DeclareMathOperator{\La}{\Leftarrow}
+\DeclareMathOperator{\Ra}{\Rightarrow}
+\DeclareMathOperator{\Lra}{\Leftrightarrow}
+\DeclareMathOperator{\Llra}{\Longleftrightarrow}
+\DeclareMathOperator{\bs}{\backslash}
+%letters_different
+\DeclareMathOperator{\CC}{\mathbb{C}}
+\DeclareMathOperator{\II}{\mathbb{I}}
+\DeclareMathOperator{\MS}{\mathbb{S}}
+\DeclareMathOperator{\DD}{\mathbb{D}}
+\DeclareMathOperator{\ZZ}{\mathbb{Z}}
+\DeclareMathOperator{\QQ}{\mathbb{Q}}
+\DeclareMathOperator{\RR}{\mathbb{R}}
+\DeclareMathOperator{\NN}{\mathbb{N}}
+\DeclareMathOperator{\HH}{\mathbb{H}}
+\DeclareMathOperator{\PP}{\mathbb{P}}
+\DeclareMathOperator{\EE}{\mathbb{E}}
+\DeclareMathOperator{\LL}{\mathscr{L}}
+\DeclareMathOperator{\KK}{\mathscr{K}}
+\DeclareMathOperator{\GA}{\mathfrak{A}}
+\DeclareMathOperator{\MA}{\mathbb{A}}
+\DeclareMathOperator{\GB}{\mathfrak{B}}
+\DeclareMathOperator{\MB}{\mathbb{B}}
+\DeclareMathOperator{\GC}{\mathfrak{C}}
+\DeclareMathOperator{\GD}{\mathfrak{D}}
+\DeclareMathOperator{\GF}{\mathfrak{F}}
+\DeclareMathOperator{\GN}{\mathfrak{N}}
+\DeclareMathOperator{\Rho}{\mathcal{P}}
+\DeclareMathOperator{\FF}{\mathcal{F}}
+\DeclareMathOperator{\MI}{\mathcal{I}}
+%common_shit
+\DeclareMathOperator{\Ker}{Ker}
+\DeclareMathOperator{\spann}{span}
+\DeclareMathOperator{\Frac}{Frac}
+\DeclareMathOperator{\Imf}{Im}
+\DeclareMathOperator{\cont}{cont}
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\ev}{ev}
+\DeclareMathOperator{\lcm}{lcm}
+\DeclareMathOperator{\chard}{char}
+\DeclareMathOperator{\codim}{codim}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\ord}{ord}
+\DeclareMathOperator{\End}{End}
+\DeclareMathOperator{\Ann}{Ann}
+\DeclareMathOperator{\Real}{Re}
+\DeclareMathOperator{\Res}{Res}
+\DeclareMathOperator{\Rad}{Rad}
+\DeclareMathOperator{\disc}{disc}
+\DeclareMathOperator{\rk}{rk}
+\DeclareMathOperator{\const}{const}
+\DeclareMathOperator{\grad}{grad}
+\DeclareMathOperator{\Aff}{Aff}
+\DeclareMathOperator{\Lin}{Lin}
+\DeclareMathOperator{\Prf}{Pr}
+\DeclareMathOperator{\Iso}{Iso}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\argmax}{argmax}
+\DeclareMathOperator{\argmin}{argmin}
+\DeclareMathOperator{\tr}{\textbf{tr}}
+%specific_shit
+\DeclareMathOperator{\Tors}{Tors}
+\DeclareMathOperator{\form}{Form}
+\DeclareMathOperator{\Pred}{Pred}
+\DeclareMathOperator{\Func}{Func}
+\DeclareMathOperator{\Const}{Const}
+\DeclareMathOperator{\arity}{arity}
+\DeclareMathOperator{\Aut}{Aut}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Term}{Term}
+\DeclareMathOperator{\sub}{sub}
+\DeclareMathOperator{\defr}{def}
+\DeclareMathOperator{\Sub}{Sub}
+\DeclareMathOperator{\Atom}{Atom}
+\DeclareMathOperator{\FV}{FV}
+\DeclareMathOperator{\Sent}{Sent}
+\DeclareMathOperator{\Th}{Th}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\Eq}{Eq}
+\DeclareMathOperator{\Prop}{Prop}
+
+\DeclareMathOperator{\fquad}{\qquad \qquad}
+\DeclareMathOperator{\equad}{\qquad \qquad \qquad \qquad}
+%env_shortens_from_hirsh            
+\newcommand{\bex}{\begin{example}\rm}
+\newcommand{\eex}{\end{example}}
+\newcommand{\ba}{\begin{algorithm}\rm}
+\newcommand{\ea}{\end{algorithm}}
+\newcommand{\bea}{\begin{eqnarray*}}
+    \newcommand{\eea}{\end{eqnarray*}}
+
+    \newcommand{\abs}[1]{\lvert#1\rvert}
+    \newcommand{\bp}{\begin{prob}}
+        \newcommand{\ep}{\end{prob}}
+        \newcommand{\be}{\begin{ex}}
+        \newcommand{\ee}{\end{ex}}
+    
+    
+
+%ya_ebanutyi
+\newcommand{\resetexlcounters}{%
+  \setcounter{prob}{0}%
+} 
+\newcommand{\resetremarkcounters}{%
+  \setcounter{remark}{0}%
+} 
+\newcommand{\reseconscounters}{%
+  \setcounter{cons}{0}%
+} 
+\newcommand{\resetall}{%
+    \resetexlcounters
+    \resetremarkcounters
+    \reseconscounters%
+}
+\newcommand{\cursed}[1]{\textit{\textcolor{coralpink}{#1}}}
+\newcommand{\de}[3][2]{\index{#2}{\textbf{\textcolor{coralpink}{#3}}}}
+\newcommand{\re}[3][2]{\hypertarget{#2}{\textbf{\textcolor{coralpink}{#3}}}}
+\newcommand{\se}[3][2]{\index{#2}{\textit{\textcolor{coralpink}{#3}}}}
+
+\lstset{frame=tb,
+  language=Haskell,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=false,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+%envirnoments
+\theoremstyle{indented}
+\newtheorem{theorem}{Теорема}
+\newtheorem{lemma}{Лемма}
+\newtheorem{alg}{Алгоритм}
+\newtheorem*{etheorem}{Theorem}
+\newtheorem{elemma}{Lemma}
+\newtheorem{ealg}{Algorythm}
+\newtheorem{st}{Статья}
+
+\theoremstyle{definition} 
+\newtheorem{defn}{Определение}
+\newtheorem*{exl}{Пример(ы)}
+\newtheorem{prob}{ }
+\newtheorem{problem}{Задача}
+\newtheorem{edefn}{Definition}
+\newtheorem*{eexl}{Example(s)}
+\newtheorem{eproblem}{Problem}
+
+\theoremstyle{remark} 
+\newtheorem*{remark}{Примечание}
+\newtheorem*{hint}{Подсказка}
+\newtheorem*{cons}{Следствие}
+\newtheorem{exer}{Упражнение}
+\newtheorem{stat}{Утверждение}
+\newtheorem*{prop}{Свойство(а)}
+\newtheorem*{sol}{Решение}
+\newtheorem*{ans}{Ответ}
+\newtheorem*{eremark}{Remark}
+\newtheorem*{ehint}{Hint}
+\newtheorem*{econs}{Corollary}
+\newtheorem{eexer}{Excercise}
+\newtheorem{estat}{Statement}
+\newtheorem*{eprop}{Property(ies)}
+\newtheorem*{esol}{Solution}
+\newtheorem*{eans}{Answer}
+
+\definecolor{coralpink}{rgb}{0.8, 0.2, 0.2}
+
+
+\newcommand{\reset}{%
+  \setcounter{prob}{0}%
+} 
+

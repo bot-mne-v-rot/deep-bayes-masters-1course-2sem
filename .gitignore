@@ -7,7 +7,7 @@
 *.upa
 *.upb
 *.pdf
-**/.DS_Stores
+**/.DS_Store
 **.idx
 **.ilg
 **.ind

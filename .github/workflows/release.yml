@@ -1,0 +1,33 @@
+name: Build LaTeX document
+
+on: 
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
+
+jobs:
+    build_latex:
+        runs-on: ubuntu-latest
+        steps:
+        - name: Set up Git repository
+          uses: actions/checkout@v3
+        - name: Compile LaTeX document
+          uses: xu-cheng/latex-action@v3
+          with:
+            root_file: neurobayes.tex
+        - name: Upload PDF file
+          uses: actions/upload-artifact@v3
+          with:
+            path: neurobayes.pdf
+        - name: Create github release
+          uses: softprops/action-gh-release@v1
+          with:
+            files: neurobayes.pdf
+            tag_name: ${{ github.sha }}
+            name: Abstract release
+            body: |
+                New abstract release
+            draft: true
+            prerelease: false
+                

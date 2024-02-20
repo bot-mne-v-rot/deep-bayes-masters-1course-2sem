@@ -1,0 +1,112 @@
+\subsection{Lecture}
+
+Let us have function $f(x)$ that we wenat to minimise. $g(x) : \EE g(x) = \grad f(x)$ and $x_{t + 1} = x_t - \chi \cdot g(x_t)$, where $\sum \chi_t = + \inf$ and $\sum \chi_t^2 < + \inf$. Then, $\grad f(\lim_{t \to \inf} x_t) = 0$. We need to understan, how to compute stochastic gradient ($g$) for differefnt functions ($f$). 
+
+\begin{table}[!h]
+    \centering
+    \begin{tabular}{c | c | c}
+        $f(x)$ & $\operatorname{stochgrad} f(x)$ & Remarks \\ \hline
+        $\sum_{i = 1}^n f_i(x)$ & $n \cdot \nabla f_j(x)$ & $j \sim U\{1, \ldots, n\}$ \\ \hline
+        $\int p(y) h(x, y) dy$ & $\frac{\partial}{\partial x} h(x, \widehat{y})$ & $\widehat{y} \sim p(y)$ \\ \hline 
+        $\int p(y) \int_{i = 1}^n h_i(x, y) dy$ & $\frac{\partial}{\partial x} h_j(x, \widehat{y})$ & $\widehat{y} \sim p(y)$, $j \sim U\{1, \ldots, n\}$ \\ \hline
+        $\int p(y | x) h(x, y) dy$ & $\frac{\partial}{\partial x} h(x, \widehat{y}) + h(x, \widehat{y}) \frac{\partial}{\partial x} \log p(\widehat{y}| x)$ & $\widehat{y} \sim p(y | x)$ \\ \hline
+    \end{tabular}
+\end{table}
+
+Where in the last case we obtain 
+
+\begin{equation*}
+    \begin{aligned}
+        \frac{\partial}{\partial x} \int p(y | x) h(x, y) dy &= \int \frac{\partial}{\partial x} \left( p(y | x) h(x, y) \right) dy = \int \frac{\partial}{\partial x} p(y | x) h(x, y) dy + \int p(y | x) \frac{\partial}{\partial x} h(x, y) dy \\ 
+        &= \left\{ \frac{\partial}{\partial x} f(x) = f(x) = \frac{\partial \log f(x)}{\partial x} \right\} = \int p(y| x)\frac{\partial}{\partial x} \log p(y | x) h(x, y) dy \\ 
+        &+ \int p(y | x) \frac{\partial}{\partial x} h(x, y) dy = \int p(y| x) \left[ h(x, y) \frac{\partial}{\partial x} \log p(y | x) + \frac{\partial}{\partial x} h(x, y) \right] dy \approx ?
+    \end{aligned}
+\end{equation*}
+
+Let's assume a model $p(X, \theta) = p(X | \theta) p(\theta)$, where $p(X | \theta)$ is a likelihood and $p(\theta)$ is a prior. 
+
+\begin{equation*}
+    \begin{aligned}
+        p(\theta | X) = \frac{\prod_{i = 1}^n p(x_i | \theta) \cdot p(\theta)}{\int \prod_{i = 1}^n p(x_i | \theta) \cdot p(\theta) d\theta} 
+    \end{aligned}
+\end{equation*}
+
+and if we are given $n \gg 1$ with $d \ll n$, then $\lim_{n \gg d} p(\theta | X) \approx \delta_{MP}$. When we have a condition $n \gg 1$, we can approximate $p(\theta | X)$ with $q(\theta | \varphi) = \argmin_{\varphi} \operatorname{KL}(q(\theta | \varphi) \parallel p(\theta | X))$. The last can be rewritten as
+
+\begin{equation*}
+    \begin{aligned}
+        \argmax_{\varphi} \LL(\varphi) = \argmax_{\varphi} \int q(\theta | \varphi) \log \frac{p(X, \theta)}{q(\theta | \varphi)} d\theta .
+    \end{aligned}
+\end{equation*}
+
+Hence, we can obtain the following:
+
+\begin{equation}
+    \begin{aligned}
+        \frac{\partial}{\partial \varphi} \LL \varphi &= \frac{\partial}{\partial \varphi} \int q(\theta | \varphi) \log \frac{\prod_{i = 1}^n p(x_i | \theta) \cdot p(\theta)}{q(\theta | \varphi)} d\theta \\ 
+        &= \frac{\partial}{\partial \varphi} \biggl[ \int q(\theta | \varphi) \sum_{i = 1}^n \log p(x_i | \theta) d\theta +  \int q(\theta | \varphi) \log p(x_i | \theta) d \theta - \int q (\theta | \varphi) \log q(\theta | \varphi) d \theta \biggr] \\ 
+        &\approx \left( \sum_{i = 1}^n \log p(x_i | \theta) \right) \frac{\partial}{\partial \varphi} \log q(\widehat{\theta} | \varphi) + \log p(\widehat{\theta}) \frac{\partial}{\partial \varphi} \log q(\widehat{\theta} | \varphi) - \log q(\widehat{\theta} | \varphi) \frac{\partial}{\partial \varphi} \log q(\widehat{\theta} | \varphi) \\ 
+        &\approx \frac{\partial}{\partial \varphi} \log q(\widehat{\theta} | \varphi) \left[ n \cdot \log p(x_j | \widehat{\theta}) + \log p(\widehat{\theta}) - \log q(\widehat{\theta} | \varphi) \right] \\
+    \end{aligned}
+\end{equation}
+
+where $\widehat{\theta} \sim q(\theta | \varphi)$, $j \sim U\{1, \ldots, n\}$, and the process is called \cursed{double stochastic inference}. However, $\frac{\partial}{\partial x} \log q(\widehat{\theta} | \varphi)$ oscillates around zero and it can cause some problems. As $q$ is an arbitrary distibution, which does not depent on our data, in the beginning on the process we can obtain a quite large variance. 
+
+Untill the parsmetrisation trick was invented (we will discuss it on seminar), some other methods were used. Suppose we have $\EE_{p(x)} f(x) = F$, $f(\widehat{x})$ with $\widehat{x} \sim p(x)$ and $g(x)$ such that $\EE g(x) = 0$. Hence, 
+
+\begin{equation*}
+    \begin{aligned}
+        \EE\left( f(x) + \lambda g(x)\right) &= F \\ 
+        \DD \left( f(x) + \lambda g(x) \right) &\to \min_\lambda
+    \end{aligned}
+\end{equation*}
+
+so then
+
+\begin{equation*}
+    \begin{aligned}
+        \DD \left( f(x) + \lambda g(x)\right) = \DD f + 2 \lambda \cov(f, g) + \lambda^2 \DD g(x) 
+    \end{aligned}
+\end{equation*}
+
+which after differentiation by $\lambda$ gives zero. Hence, $$\lambda_* = - \frac{\cov(f, g)}{\DD g(x)}.$$ And the minimum is
+
+\begin{equation*}
+    \begin{aligned}
+        \DD \left( f(x) + \lambda g(x)\right) = \DD \left( f - \frac{\cov(f, g)}{\DD g(x)} g(x) \right)= \DD f (1 - \rho^2),
+    \end{aligned}
+\end{equation*}
+
+where $\rho$ is a correlation coefficient. Hence, we can add $\lambda \frac{\partial}{\partial \varphi} \log q(\theta | \varphi)$ (which has zero mean) to $(1)$, or even change the coefficient to $\lambda(x_j)$. 
+
+The other way is so-called REINFORCE+ technique. Assume we have 
+
+\begin{equation*}
+    \begin{aligned}
+        \frac{\partial \log q(\widehat{\theta_0} | \varphi)}{\partial \varphi} \left[ f(\widehat{\theta_0}) - \frac{1}{K} \sum_{k = 1}^K f(\widehat{\theta_k}) \right], 
+    \end{aligned}
+\end{equation*}
+
+where $\widehat{\theta_0}, \ldots, \widehat{\theta_k} \sim q(\theta | \varphi)$ and hence
+
+\begin{equation*}
+    \begin{aligned}
+        \EE_{\widehat{\theta_0}, \widehat{\theta_k}} \frac{\partial \log q (\widehat{\theta_0} | \varphi)}{\partial \varphi} f(\widehat{\theta_k}) &= \EE_{\widehat{\theta_0}} = \frac{\partial \log q(\widehat{\theta_0} | \varphi)}{\partial \varphi} \EE_{\widehat{\theta_k}} f(\widehat{\theta_k}) = 0; \\ 
+        \DD \left(\frac{\partial}{\partial \varphi} \log q(\widehat{\theta} | \varphi) f(\widehat{\theta})\right) &= \left( \EE f(\widehat{\theta_0}) \right)^2 \DD \frac{\partial}{\partial \varphi} \log q(\widehat{\theta_0} | \varphi) + \DD \frac{\partial}{\partial \varphi} \log q(\widehat{\theta_0} | \varphi) \cdot \DD f(\widehat{\theta_0}); \\ 
+        \DD \left( \frac{\partial}{\partial \varphi} \log q(\widehat{\theta_0} | \varphi) \right) &= f(\widehat{\theta_0}) - \frac{1}{k} \sum_{k = 1}^K f(\widehat{\theta_k}) - \frac{K + 1}{K} \DD f(\widehat{\theta}) \frac{\partial \log q (\widehat{\theta} | \varphi)}{\partial \varphi}
+    \end{aligned}
+\end{equation*}
+
+% \subsection{Seminar}
+
+% Let's assume relevance vector model: $x \in \RR^d$, $w \in \RR^d$, $t \in \{-1, +1\}$, 
+
+% \begin{equation*}
+%     \begin{aligned}
+%         p(t | x, w) &= \frac{1}{1 + \exp(-t w^T x)} \\ 
+%         p(t, w | x) &= p(t | x, w) p(w | \Lambda) \\ 
+%         p(w | \Lambda) &= \prod_{i = 1}^d \mathcal{N}(w | 0, \lambda_j^2) 
+%     \end{aligned}
+% \end{equation*}
+
+% In case of $n \gg 1$, $d \gg 1$, we can say that $\Lambda^* = \argmax p(T | x, \lambda) \quad (*)$

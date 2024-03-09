@@ -14,6 +14,7 @@
 \usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools}
 \usepackage{icomma}
 \usepackage{euscript}
+\usepackage{physics}
 \usepackage{mathrsfs}
 \usepackage[dvipsnames]{xcolor}
 \usepackage[left=2cm,right=2cm,
@@ -94,21 +95,21 @@
 \DeclareMathOperator{\Imf}{Im}
 \DeclareMathOperator{\cont}{cont}
 \DeclareMathOperator{\id}{id}
-\DeclareMathOperator{\ev}{ev}
+% \DeclareMathOperator{\ev}{ev}
 \DeclareMathOperator{\lcm}{lcm}
 \DeclareMathOperator{\chard}{char}
 \DeclareMathOperator{\codim}{codim}
-\DeclareMathOperator{\rank}{rank}
+% \DeclareMathOperator{\rank}{rank}
 \DeclareMathOperator{\ord}{ord}
 \DeclareMathOperator{\End}{End}
 \DeclareMathOperator{\Ann}{Ann}
 \DeclareMathOperator{\Real}{Re}
-\DeclareMathOperator{\Res}{Res}
+% \DeclareMathOperator{\Res}{Res}
 \DeclareMathOperator{\Rad}{Rad}
 \DeclareMathOperator{\disc}{disc}
 \DeclareMathOperator{\rk}{rk}
 \DeclareMathOperator{\const}{const}
-\DeclareMathOperator{\grad}{grad}
+% \DeclareMathOperator{\grad}{grad}
 \DeclareMathOperator{\Aff}{Aff}
 \DeclareMathOperator{\Lin}{Lin}
 \DeclareMathOperator{\Prf}{Pr}
@@ -116,7 +117,7 @@
 \DeclareMathOperator{\cov}{cov}
 \DeclareMathOperator{\argmax}{argmax}
 \DeclareMathOperator{\argmin}{argmin}
-\DeclareMathOperator{\tr}{\textbf{tr}}
+% \DeclareMathOperator{\tr}{\textbf{tr}}
 %specific_shit
 \DeclareMathOperator{\Tors}{Tors}
 \DeclareMathOperator{\form}{Form}
@@ -148,7 +149,7 @@
 \newcommand{\bea}{\begin{eqnarray*}}
     \newcommand{\eea}{\end{eqnarray*}}
 
-    \newcommand{\abs}[1]{\lvert#1\rvert}
+    % \newcommand{\abs}[1]{\lvert#1\rvert}
     \newcommand{\bp}{\begin{prob}}
         \newcommand{\ep}{\end{prob}}
         \newcommand{\be}{\begin{ex}}
@@ -199,32 +200,17 @@
 
 %envirnoments
 \theoremstyle{indented}
-\newtheorem{theorem}{Теорема}
-\newtheorem{lemma}{Лемма}
-\newtheorem{alg}{Алгоритм}
 \newtheorem*{etheorem}{Theorem}
 \newtheorem{elemma}{Lemma}
-\newtheorem{ealg}{Algorythm}
-\newtheorem{st}{Статья}
+\newtheorem{ealg}{Algorithm}
 
 \theoremstyle{definition} 
-\newtheorem{defn}{Определение}
-\newtheorem*{exl}{Пример(ы)}
 \newtheorem{prob}{ }
-\newtheorem{problem}{Задача}
 \newtheorem{edefn}{Definition}
 \newtheorem*{eexl}{Example(s)}
 \newtheorem{eproblem}{Problem}
 
 \theoremstyle{remark} 
-\newtheorem*{remark}{Примечание}
-\newtheorem*{hint}{Подсказка}
-\newtheorem*{cons}{Следствие}
-\newtheorem{exer}{Упражнение}
-\newtheorem{stat}{Утверждение}
-\newtheorem*{prop}{Свойство(а)}
-\newtheorem*{sol}{Решение}
-\newtheorem*{ans}{Ответ}
 \newtheorem*{eremark}{Remark}
 \newtheorem*{ehint}{Hint}
 \newtheorem*{econs}{Corollary}
@@ -240,4 +226,3 @@
 \newcommand{\reset}{%
   \setcounter{prob}{0}%
 } 
-

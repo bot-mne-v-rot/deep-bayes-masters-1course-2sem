@@ -1,54 +1,81 @@
 \subsection{Lecture}
 
 \begin{edefn}
-    Let $p(x \vert \theta)$ be distribution. Concidering $\frac{\partial \log p(\hat{x} | \theta)}{\partial \theta}$, where $\hat{x} \sim p(x | \theta)$. 
-    
+    Let $p(x \vert \theta)$ be distribution. Considering $\frac{\partial \log p(\hat{x} | \theta)}{\partial \theta}$, where $\hat{x} \sim p(x | \theta)$ and $\theta \in \RR^n$.
+
     \begin{equation*}
-        \int p(x | \theta) \frac{\partial \log p(\hat{x} | \theta)}{\partial \theta} d\hat{x} = \frac{\partial}{\partial \theta} \int p(x | \theta) d\hat{x} = \frac{\partial}{\partial \theta} 1 = 0
+        \int p(\hat{x} | \theta) \frac{\partial \log p(\hat{x} | \theta)}{\partial \theta} d\hat{x} = \frac{\partial}{\partial \theta} \int p(\hat{x} | \theta) d\hat{x} = \frac{\partial}{\partial \theta} 1 = 0
     \end{equation*}
 
-    And \cursed{Fisher information} is defined as
+    And \cursed{Fisher information matrix} is defined as
     \begin{equation*}
         \begin{aligned}
-            F(\theta) &= \int p(x | \theta) \left( \frac{\partial \log p(\hat{x} | \theta)}{\partial \theta} \right) \left( \frac{\partial \log p(\hat{x} | \theta)}{\partial \theta} \right)^T dx -\int p(x | \theta) \left( \frac{\partial^2 \log p(\hat{x} | \theta)}{\partial \theta} \right) dx \succeq 0
+            F(\theta) &= \int p(\hat{x} | \theta) \left( \frac{\partial \log p(\hat{x} | \theta)}{\partial \theta} \right) \left( \frac{\partial \log p(\hat{x} | \theta)}{\partial \theta} \right)^T \dd \hat{x} \\
+                      &= -\int p(\hat{x} | \theta) \left( \frac{\partial^2 \log p(\hat{x} | \theta)}{\partial \theta^2} \right) \dd \hat{x} \\
+                      &= \mathbb{E}_{\hat{x} \sim p(x | \theta)} \left[ \left( \frac{\partial \log p(\hat{x} | \theta)}{\partial \theta} \right)^2 \right].
         \end{aligned}
-    \end{equation*}
-
-    or
-    \begin{equation*}
-        F(\theta) = \mathbb{E}_{\hat{x} \sim p(x | \theta)} \left[ \left( \frac{\partial \log p(\hat{x} | \theta)}{\partial \theta} \right)^2 \right].
     \end{equation*}
 \end{edefn}
 
-Let $f(x)$ be a function, $\grad f(x) \propto \argmax f(x + \delta)$ such that $\rho(x, x+ \delta) < \varepsilon$.  $$\int p(x | \theta) g(x) dx = \MI(p(x | \theta)) = \MI(\theta)$$
+To prove the 2nd ``='' in the above definition, consider i,j-th element of the matrix:
+\begin{equation*}
+    \begin{aligned}
+        &-\int p(\hat{x} | \theta) \left( \pdv{\log p(\hat{x} | \theta)}{\theta_j}{\theta_i} \right) \dd \hat{x} \\
+        &=-\int p(\hat{x} | \theta) \left( \pdv{\theta_j}(\frac{1}{p(\hat{x} | \theta)}\pdv{p(\hat{x} | \theta)}{\theta_i}) \right) \dd \hat{x} \\
+        &=\int p(\hat{x} | \theta) \left(\frac{1}{p(\hat{x} | \theta)}\right)^2 \left(\pdv{p(\hat{x} | \theta)}{\theta_j}\right)\left(\pdv{p(\hat{x} | \theta)}{\theta_i}\right) \dd \hat{x}
+          - \underbrace{\int \pdv{p(\hat{x} | \theta)}{\theta_i}{\theta_j} \dd \hat{x}}_{0} \\
+        &= \int p(\hat{x} | \theta) \left( \pdv{\log p(\hat{x} | \theta)}{\theta_i} \right) \left( \pdv{\log p(\hat{x} | \theta)}{\theta_j} \right) \dd \hat{x} \\
+        &\equiv F_{i,j}(\theta)
+    \end{aligned}
+\end{equation*}
+
+\begin{eremark}
+    $F(\theta) \succeq 0$, i.e. Fisher information matrix is positive semi-definite for all values of $\theta$.
+    To prove this, denote by $g$ the gradient $\pdv{\log p(x\mid \theta)}{\theta}$ and note that for a vector $v$ we can write $v^T F(\theta) v = \int p(x\mid \theta) v^T gg^T v\dd x = \int p(x\mid \theta) (v^T g)^2 \dd x \ge 0$.
+\end{eremark}
+
+\vspace{3em}
+
+Let $f(x)$ be a function, then its gradient may be expressed in the following peculiar way.
+$$\grad f(x) \propto \argmax_{\delta} f(x + \delta)
+\text{ such that } \rho(x, x+ \delta) < \varepsilon \text{ and } \varepsilon>0 \text{ is sufficiently small }
+$$
+% % I tried, but this definition is too sloppy to be formalized.
+% % Moreover, the original paper presents it the same way: https://arxiv.org/abs/1206.7051
+% Formally,
+% $$\grad f(x) = C(x) \lim_{\varepsilon \to 0+} [ \argmax_{\delta \in B_{\varepsilon}} f(x + \delta)]$$
+% where $B_{\varepsilon} \subset \RR^n$ is the zero-centered ball with radius $\varepsilon$ and $C(x)$ is some positive-real-valued function.
+% This is true because $f(x + \delta) = f(x) + \langle \grad f(x), \delta \rangle  + O(\norm{\delta}^2)$.
+% $$\int p(x | \theta) g(x) dx = \MI(p(x | \theta)) = \MI(\theta)$$
 
 \begin{edefn}
-    \cursed{Natural gradient}, $\operatorname{natgrad} \MI \propto \argmax \MI(\theta + \delta) = F^{-1}(\theta) \grad \MI (\theta)$ such that $$\operatorname{KL} \left( p(x | \theta) \parallel p(x | \theta + \delta)\right) < \varepsilon.$$  
+    % proposed in paper https://doi.org/10.1162/089976698300017746
+    \cursed{Natural gradient}, $\operatorname{natgrad} \MI \propto \argmax \MI(\theta + \delta) = F^{-1}(\theta) \grad \MI (\theta)$ such that $$\operatorname{KL} \left( p(x | \theta) \parallel p(x | \theta + \delta)\right) < \varepsilon.$$
 \end{edefn}
 
 \begin{eremark}
-    Natural gradient is a parametrisation invariant.
+    Natural gradient is parametrisation-invariant.
 \end{eremark}
 
 Let's consider $$p(X, Z, \theta) = \prod_{i = 1}^n p(x_i, z_i | \theta) p(\theta),$$ where $x_i$ are observed, $z_i$ are hidden and $\theta$ are parameters. We want to find $p(Z, \theta | X)$ assuming that it is integrable and that we have $Z$ -- conjugate to $\theta$ and vice versa. Then we can approximate $p(Z, \theta | X) \approx q(Z) q(\theta)$ and from conjugacy and exponential family conclude
 \begin{equation*}
     \begin{aligned}
-        p(x, z | \theta) &= f(\theta) \rho(x, z) \exp (\theta^T h(x, z)) \\ 
-        p(\theta) &= \frac{f(\theta)}{g(\nu_0, \eta_0)} \exp (\eta_0^T \theta)  
+        p(x, z | \theta) &= f(\theta) \rho(x, z) \exp (\theta^T h(x, z)) \\
+        p(\theta) &= \frac{f(\theta)}{g(\nu_0, \eta_0)} \exp (\eta_0^T \theta)
     \end{aligned}
 \end{equation*}
 
-Therefore, 
+Therefore,
 \begin{equation*}
     \begin{aligned}
-        \log  q(Z) &= \EE_{q(\theta)} \log p(X, Z, \theta) + \const = \sum_{i = 1}^n \EE_{\theta} \log p(x_i, z_i | \theta) + \EE_\theta\log p(\theta) + \const \\ 
-        &= \sum_{i = 1}^n \left( \EE_\theta \log f(\theta) + \log p(x_i, z_i) + \EE \theta^T h(x_i, z_i)\right) + \const \\ 
-        &= \underbrace{\sum_{i = 1}^n \left(\log p(x_i, z_i) + \EE \theta^T h(x_i, z_i) \right)}_{eq. 1} + \const \\ 
+        \log  q(Z) &= \EE_{q(\theta)} \log p(X, Z, \theta) + \const = \sum_{i = 1}^n \EE_{\theta} \log p(x_i, z_i | \theta) + \EE_\theta\log p(\theta) + \const \\
+        &= \sum_{i = 1}^n \left( \EE_\theta \log f(\theta) + \log p(x_i, z_i) + \EE \theta^T h(x_i, z_i)\right) + \const \\
+        &= \underbrace{\sum_{i = 1}^n \left(\log p(x_i, z_i) + \EE \theta^T h(x_i, z_i) \right)}_{eq. 1} + \const \\
         &= \sum_{i = 1}^n \log q(z_i) + \const,
     \end{aligned}
 \end{equation*}
 
-hence, $q(Z) = \prod_{i = 1}^n q(z_i)$. And 
+hence, $q(Z) = \prod_{i = 1}^n q(z_i)$. And
 \begin{equation*}
     \begin{aligned}
            \log q(\theta) &= \EE_{q(Z)} \log p(X, Z, \theta) + \const = \sum_{i = 1}^n \EE_{z_i} \log p(x_i, z_i | \theta) + \EE_{Z} \log p(\theta) + \const = \\
@@ -57,65 +84,65 @@ hence, $q(Z) = \prod_{i = 1}^n q(z_i)$. And
 \end{equation*}
 
 \begin{eremark}
-       Here, when $n \gg 1$, we willl struggle. 
+       Here, when $n \gg 1$, we willl struggle.
 \end{eremark}
 
-Let's take a look at 
+Let's take a look at
 \begin{equation*}
-    \log p(X) = \int q(Z) q(\theta) \log \frac{p(X, Z, \theta)}{q(Z) q(\theta)} dZ d\theta + \operatorname{KL}(q(Z) q(\theta) \parallel p(Z, \theta | X)) = \LL(q(Z), q(\theta)), 
+    \log p(X) = \int q(Z) q(\theta) \log \frac{p(X, Z, \theta)}{q(Z) q(\theta)} dZ d\theta + \operatorname{KL}(q(Z) q(\theta) \parallel p(Z, \theta | X)) = \LL(q(Z), q(\theta)),
 \end{equation*}
 
 which is greater than the first term as the second term is non-negative. Now, instead of block-coordinate optimizations, we can use gradient optimizations.
 \begin{equation*}
     \begin{aligned}
-        q(\theta) &= f(\theta) \exp \left( \theta^T \left( \underbrace{\eta_0 + \sum_{i = 1}^n \EE_{z_i} h(x_1, z_i)}_{\eta_1}\right) \right) \frac{1}{g(\nu_0 + n, \eta_0 + \sum_{i = 1}^n \EE h(x_1, z_i))} \\ 
+        q(\theta) &= f(\theta) \exp \left( \theta^T \left( \underbrace{\eta_0 + \sum_{i = 1}^n \EE_{z_i} h(x_1, z_i)}_{\eta_1}\right) \right) \frac{1}{g(\nu_0 + n, \eta_0 + \sum_{i = 1}^n \EE h(x_1, z_i))} \\
         &= \frac{f(\theta)}{f(\nu_1, \eta_1)} \exp \left( \theta^T \eta_1 \right),
     \end{aligned}
 \end{equation*}
-    
-where $\nu_1 = \nu_0 + n$. So that 
+
+where $\nu_1 = \nu_0 + n$. So that
 \begin{equation*}
     \begin{aligned}
-        \MI(\eta_1) &= \int q(Z) q(\theta | \eta_1) \left[\log p(X, Z, \theta) - \log q(\theta, \eta_1) \right] dZ d\theta + \const \\ 
+        \MI(\eta_1) &= \int q(Z) q(\theta | \eta_1) \left[\log p(X, Z, \theta) - \log q(\theta, \eta_1) \right] dZ d\theta + \const \\
         &= \int q(Z) q(\theta | \eta_1) \left[ \sum_{i = 1}^n \log p(x_i, z_i | \theta) + \log p(\theta) - \log q(\theta | \eta_1) \right] dZ d\theta + \const \\
-        &= \int q(Z) q(\theta | \eta_1) \big[ n \log f(\theta) + \sum_{i = 1}^n \log p(x_i, z_i) + \theta^T \big( \sum_{i = 1}^n h(x_i, z_i) + \nu_0 \log f(\theta) + \eta_0^T \theta -\\ 
+        &= \int q(Z) q(\theta | \eta_1) \big[ n \log f(\theta) + \sum_{i = 1}^n \log p(x_i, z_i) + \theta^T \big( \sum_{i = 1}^n h(x_i, z_i) + \nu_0 \log f(\theta) + \eta_0^T \theta -\\
         &\equad - \log g(\nu_0, \eta_0)\big) - (n + \nu_0) \log f(\theta) - \theta^T \eta_1 + \log g(\nu_1, \eta_1)\big] dZ d\theta + \const \\
-        &= q(\theta | \eta_1) \left[ \theta^T \left( \sum_{i = 1}^n \EE h(x_i, z_i) + \eta_0 - \eta_1\right) + \log g(\nu_1, \eta_1)\right] d \theta \\ 
+        &= q(\theta | \eta_1) \left[ \theta^T \left( \sum_{i = 1}^n \EE h(x_i, z_i) + \eta_0 - \eta_1\right) + \log g(\nu_1, \eta_1)\right] d \theta \\
         &= \int q(\theta | \eta_1) \left[ \theta^T \left( \nu_0 - \eta_1 + \sum_{i = 1}^n \EE h(x_i, z_i)\right)\right] d \theta + \log g(\nu_1, \eta_1) + \const.
     \end{aligned}
 \end{equation*}
 
-so that 
+so that
 \begin{equation*}
-    \frac{\partial}{\partial \eta_1} \MI(\eta_1) = \underbrace{\frac{\partial^2 \log g(\eta_1, \nu_1)}{\partial^2 \eta_1}}_{F(\eta_1)} \left(\eta_0 - \eta_1 + \sum_{i = 1}^n \EE h(x_i, z_i) \right), 
+    \frac{\partial}{\partial \eta_1} \MI(\eta_1) = \underbrace{\frac{\partial^2 \log g(\eta_1, \nu_1)}{\partial^2 \eta_1}}_{F(\eta_1)} \left(\eta_0 - \eta_1 + \sum_{i = 1}^n \EE h(x_i, z_i) \right),
 \end{equation*}
 
 \begin{equation*}
     \begin{aligned}
-        \operatorname{natgrad} \MI(\eta_1) = \eta_0 - \eta_1 + \sum_{i = 1}^n \EE h(x_i, z_i); \\ 
+        \operatorname{natgrad} \MI(\eta_1) = \eta_0 - \eta_1 + \sum_{i = 1}^n \EE h(x_i, z_i); \\
         \operatorname{stochnatgrad} \MI(\eta_1) = \eta_0 - \eta_1 + n \EE_{z_j} h(x_j, z_j),
     \end{aligned}
 \end{equation*}
 
-where $j \sim U\{1, \ldots, n\}$. And the iterative algorithm is 
+where $j \sim U\{1, \ldots, n\}$. And the iterative algorithm is
 \begin{itemize}
-    \item Set $j \sim U\{1, \ldots, n\}$; 
+    \item Set $j \sim U\{1, \ldots, n\}$;
     \item Update $\log q(z_j) = \log p(x_j, z_j) + \EE \theta^T h(x_j, z_j) + \const$;
     \item $\eta_1^{t+1} = \eta_1^t + \alpha \left( \eta_0 - \eta_1^t + \EE h(x_j, z_j) \right)$.
 \end{itemize}
 
 \subsection{Seminar}
 
-And now once again about Fisher information. Let $p(x | \mu, \sigma^2) = \frac{1}{\sqrt{2\pi \sigma^2}} \exp \left( -\frac{(x - \mu)^2}{2\sigma^2} \right)$, then we can say that $\MI_x(\mu)$ represents the information contained in $x$ about $\mu$. $\MI_x(\mu) \propto \frac{1}{\sigma^2}$. 
+And now once again about Fisher information. Let $p(x | \mu, \sigma^2) = \frac{1}{\sqrt{2\pi \sigma^2}} \exp \left( -\frac{(x - \mu)^2}{2\sigma^2} \right)$, then we can say that $\MI_x(\mu)$ represents the information contained in $x$ about $\mu$. $\MI_x(\mu) \propto \frac{1}{\sigma^2}$.
 
 \begin{edefn}
     The \cursed{Fisher information} is defined as $$\MI(\theta) = \EE \left[ \left( \frac{\partial \log p(x | \theta)}{\partial \theta} \right)^2 \right] = -\EE \left[ \frac{\partial^2 \log p(x | \theta)}{\partial \theta^2} \right].$$
 \end{edefn}
 
-So for Gaussian distribution we have $\theta = \mu$, 
+So for Gaussian distribution we have $\theta = \mu$,
 \begin{equation*}
     \begin{aligned}
-        \log p(x | \mu) &= \log \frac{1}{\sqrt{2 \pi \sigma^2}}- \frac{(x - \mu)^2}{2\sigma^2}, \\ 
+        \log p(x | \mu) &= \log \frac{1}{\sqrt{2 \pi \sigma^2}}- \frac{(x - \mu)^2}{2\sigma^2}, \\
         \frac{\partial \log p(x | \mu)}{\partial \mu} &= \frac{x - \mu}{\sigma^2}, \\
         \MI(\theta) &= \frac{1}{\sigma^2}.
     \end{aligned}
@@ -123,9 +150,8 @@ So for Gaussian distribution we have $\theta = \mu$,
 
 Alternative definition of Fisher information is
 \begin{enumerate}
-    \item $\MI_x(\theta) = - \EE(l''(\theta | x))$; 
+    \item $\MI_x(\theta) = - \EE(l''(\theta | x))$;
     \item $\MI_x(\theta) = \Var (l'(\theta |x))$,
 \end{enumerate}
 
-where $l$ is a score function, $l(\theta | x) = \log p(x | \theta)$. 
-
+where $l$ is a score function, $l(\theta | x) = \log p(x | \theta)$.

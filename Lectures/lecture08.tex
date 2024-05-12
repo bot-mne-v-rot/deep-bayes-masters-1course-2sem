@@ -1,0 +1,125 @@
+Let's generealise differential equation: 
+
+\[ 
+    dx = f(x, t) dt + g(x, t) dW
+\]
+
+with $x_0 = 0$, $dx = DW$ and $x_t \sim \NN(x_t \vert 0, t)$, so that we have stochastic differential equation such that at the specific moment of time the distribution of images is Gaussian. The trajectories are random, nut still they obey some distributiuon rules. Importantly, random differential equations are not revertable in time. If we are going backward, we have some random paths (and we can end up not in the starting point). \\ 
+
+Let us now assume $x_0 \sim p_0$. We also know that $x_t \sim p_t$. If we know the equation and the distribution at the starting point. Interestingly, we can conclude that \\ 
+
+\begin{etheorem}[Fokker-Plank equation]
+    \[ 
+        \frac{\partial p_t}{\partial t} = - \frac{\partial}{\partial x} \left( f(x, t) p_t(x) \right) + \frac{1}{2} \frac{\partial^2}{\partial x^2} \left(g^2 (x, t) p_t(x) \right)
+    \]
+
+    In general case: 
+
+    \[ 
+        - \tr \frac{\partial}{\partial x} \left( f(x, t) p_t(x) \right) + \tr  \frac{\partial^2}{\partial x^2} \left(g^2 (x, t) p_t(x) \right)
+    \]
+\end{etheorem}
+
+Sketch of proof as follows. Assuming that $d = 1$ and $g(x, t) = g(t)$ (for simplicity) we would derive the equaiton. Let's first assume that we have only deterministic part of differential equation and obtainf the first part of the formula, then -- vice versa, and then we will take a sum of them. 
+
+\begin{enumerate} 
+    % упомянуть тейлор сериес
+    \item $dx = f(x, t) dt$, $x_t \sim p_t(x_t)$, so we want to find $x_{t + dt} \sim ?$. Firstly, $x_{t + dt} = x_t + f(x_t, t) dt$. In more simplier case if we have $x \sim p_x (x)$ and $y = f(x)$, we can obtain $p_y(y) dy = p_x(x) dx$ and hence $$p_y(y) = p_x(x) \vert \frac{dy}{dx} \vert^{-1}.$$ So using that we conclude that 
+    \begin{equation*}
+        \begin{aligned}
+            p_{t + dt} (x_{t + dt}) &= p_t(x_t) \vert \frac{d_{x + dt}}{d_{x_t}} \vert^{-1} = p_t(x_{t + dt} - f(x_t, t)dt) \vert \frac{d_{x + dt}}{d_{x_t}} \vert^{-1} = \\ 
+            &= \left( p_t(x_{t + dt}) - \frac{\partial p_t(x_{t + dt})}{\partial x} f(x_t, t) dt + \overline{o}(dt) \right) \left( 1 + \frac{\partial f(x_t, t)}{\partial x} \right)^{-1} = \\ 
+            &= \left( p_t(x_{t + dt}) - \frac{\partial p_t(x_{t + dt})}{\partial x} f(x_t, t) dt + \overline{o}(dt) \right) \left( 1 - \frac{\partial f(x_t, t)}{\partial x} dt + \overline{o}(dt) \right) = \\ 
+            &= p_t(x_{t + dt}) - \frac{\partial p_t(x_{t + dt})}{\partial x} f(x_t, t) dt = p_t(x_{t + dt}) \frac{\partial f(x_t, t)}{\partial x} dt + \overline{o}(dt)
+        \end{aligned}
+    \end{equation*}
+
+    So that we obtain 
+
+    \[
+        \lim_{dt \to 0} \frac{p_{t + dt} (x_{t + dt}) - p_t(x_{t + dt})}{dt} = - \frac{\partial p_t(x_{t + dt})}{\partial x} f(x_t, t) - p_t(x_{t + dt}) \frac{\partial f(x_t, t)}{\partial x}
+    \]
+    \item In the second half, we have $dx = g(t) dW$, $x_t \sim p_t$ and we can claim that $x_{t + dt} = x_t + \varepsilon$, where $\varepsilon \sim \mathrm{N}(\varepsilon \vert 0, g^2(t dt))$. 
+    
+    \begin{equation*}
+        \begin{aligned}
+            p_{t + dt} &=^{def} \int p_{t} (x_{t + dt} - \varepsilon) \NN (\varepsilon \vert 0, g^2(t dt)) = \\ 
+            &= \int \left( p_t(x_{t + dt}) - \frac{\partial p_t(x_{t + dt})}{\partial x} \varepsilon + \frac{1}{2}\varepsilon^2 \frac{\partial^2}{\partial x^2} p_t (x_{t + dt}) \overline{o}(\varepsilon^2) \mathrm{N}(\varepsilon \vert 0, g^2(t dt)) \right) d \varepsilon = \\ 
+            &= p_t (x_{t + dt}) + \frac{1}{2} \frac{\partial^2}{\partial x^2} p_t(x_{t + dt}) \int \varepsilon^2 \mathrm{N}(\varepsilon \vert 0, g^2(t dt)) d \varepsilon + \overline{o}(dt) =\\ 
+            &= p_{t}(x_{t + dt}) + \frac{1}{2} g^2(t) \frac{\partial^2}{\partial x^2} p_t(x_{t + dt}) dt
+       \end{aligned}
+    \end{equation*}
+
+    Hence, 
+
+    \begin{equation*}
+        \begin{aligned}
+            \lim_{dt \to 0} \frac{p_{t + dt}(x_{t + dt}) - p_t(x_{t + dt})}{dt} = \frac{g^2(t)}{2} \frac{\partial^2}{\partial x^2} p_t (x_t). 
+        \end{aligned}
+    \end{equation*}
+
+    That's just what we wanted. 
+\end{enumerate}
+
+Now let's consider some properties of equation:
+
+\[ 
+    dx = \frac{g^2 (t)}{2} \frac{\partial}{\partial x} \log p_0 (x) dt + g(t dW)
+\]
+
+with $x_0 \sim p_0$. By staightforward application we get 
+
+\begin{equation*}
+    \begin{aligned}
+        \frac{\partial p_t}{\partial t} \vert_{t = 0} &= - \frac{\partial}{\partial x} \left( \frac{g^2 (t)}{2} \frac{\partial \log p_0(x)}{\partial x} p_t(x) \right) + \frac{g^2 (t)}{2} \frac{\partial^2 p_t (x)}{\partial x^2} = \text{ after some manipulations... } \\ 
+        &= -\frac{g^2(t)}{2} \frac{\partial^2 }{\partial x^2} p_0(x) + \frac{g^2(t)}{2} \frac{\partial^2}{\partial x^2} p_0(x) = 0. 
+    \end{aligned}
+\end{equation*}
+
+That was about Langevin equation (TODO: explain). Important thing is that Langevin equation is reversable in time. \\ 
+
+Now let's consider standart differential equation: $dx = f(x, t) dt + g(t) dW$, $x_0 \sim p_0$. Hence, 
+
+\begin{equation*}
+    \begin{aligned}
+        dx = \left( f(x, t) - \frac{g^2 (t)}{2} \frac{\partial}{\partial x} \log p_t (x) \right) dt. 
+    \end{aligned}
+\end{equation*}
+
+And now with $x_0 \sim q_0 = p_0$ we conclude 
+
+\begin{equation*}
+    \begin{aligned}
+        \frac{\partial q_t}{\partial t} \vert_{t = 0} = :(
+    \end{aligned}
+\end{equation*}
+
+So that we consider
+
+\begin{enumerate}
+    \item Forward SDE: $dx = f(x, t) dt + g(t) dW$, $x_0 \sim p_0$; 
+    \item Equivalent ODE: $dx = \left( f(x, t) - \frac{g^2(t)}{2} \frac{\partial}{\partial x} \log p_t(x) \right) dt$; 
+    \item Backward SDE. 
+\end{enumerate}
+
+If we add up Equivalent ODE and Fw Langevin equation, we will obtail Forward SDE, and if we add Bw Langevin equation, we will obtain Backward SDE -- very cool! \\ 
+
+In diffusion models we have $x_{t + 1} = \sqrt{1 - \beta} x_t + \sqrt{\beta} \varepsilon$, where $\varepsilon \sim \NN(\varepsilon \vert 0, I)$ with $\beta \ll 1$, $x_0 \sim p_0$ and after some time we obtain $x_T \sim \NN(x_T \vert 0, I)$. Let's now say that $\beta = \gamma \cdot dt$. Then we can say that $$x_{t + dt} = \sqrt{1 - \gamma \cdot dt} x_t + \sqrt{\gamma} \varepsilon \sqrt{dt} = \left(1 - \frac{\gamma}{2} dt \right) x_t + \sqrt{\gamma} dW,$$
+
+where $dW = \NN (dW \vert 0, dt)$, and so that 
+
+\[ 
+    x_{t + dt} - x_t = dx = -\frac{\gamma}{2} x_t dt + \sqrt{\gamma} dW
+\]
+
+hence, 
+
+\[ 
+    dx = \left( -\frac{\gamma}{2} - \gamma \cdot S_\theta (x_t, t) \right) dt + \sqrt{\gamma} d \overline{W}
+\]
+
+(forward and backward (respectively?)) with ODE: 
+
+\[ 
+    dx = \left( - \frac{\gamma x_t}{2} - \frac{\gamma}{2} S_\theta (x_t, t) \right) dt. 
+\]

@@ -1,0 +1,108 @@
+Let's suppose signal $x$ goes through a system and results into $t = h(g(f(x)))$. Then we can write the derivative of $t$ with respect to $x$ as
+
+\begin{equation*}
+    \frac{\partial t}{\partial x} = \frac{\partial h}{\partial g} \frac{\partial g}{\partial f} \frac{\partial f}{\partial x}.
+\end{equation*}
+
+If there is a stochastic element in the system (e.g. $x \to (f) \to z \sim p(z | f(x)) \to (h) \to t = \EE_{z} h(z)$), we can write the derivative of $t$ with respect to $x$ as
+
+\begin{equation*}
+    \begin{aligned}
+        \frac{\partial t}{\partial x} &= \frac{\partial}{\partial x} \int p(z | f(x)) h(z) dz =\{\texttt{REINFORCE}\} \approx h(\widehat{z}) \frac{\partial}{\partial x} \log p(\widehat{z} | f(x)), \quad \widehat{z} \sim p(z | f(x)) \\ 
+        &\approx \{\texttt{Reparametrization trick } z = g(\varepsilon, f(x))\} = \frac{\partial}{\partial x} \int r(\varepsilon) h(g(\varepsilon, f(x))) d\varepsilon \approx \\
+        &\approx \frac{\partial}{\partial x} h(g(\widehat{\varepsilon}, f(x))) = \frac{\partial h}{\partial g} \frac{\partial g(\widehat{\varepsilon}, f(x))}{\partial f} \frac{\partial f}{\partial x}, \quad \widehat{\varepsilon} \sim r(\varepsilon).
+    \end{aligned}
+\end{equation*}
+
+Due to the fact that $g$ can be non-differentiable, reparamentrization trick is not always applicable. However, it is a very useful tool for the cases when it is possible to use it and we almost always consider this case. \\ 
+
+But the main restriction is when $z$ is a discrete random variable. We still could compute $g$, but of course it is not differentiable. We will try to develope something to deal with this case.
+
+\begin{edefn}
+    $x \sim \operatorname{Gumbel}(x)$ is a distribution deined as $p_G(x) = \exp(-x - \exp(-x))$ or $F_G(x) = \exp(-\exp(-x))$.
+\end{edefn} \ 
+
+Gumbel distribution is differentiable and has an interesting property. \\
+
+\begin{etheorem}
+    $\PP\{z = k\} = p_k = \PP\{k = \argmax_j u_j\}$, where $u_j = x_j + \log p_j$ and $x_j \sim \operatorname{Gumbel}$.
+\end{etheorem}
+
+\begin{proof}
+    \begin{equation*}
+        \begin{aligned}
+            \PP\{k &= \argmax_j u_j\} = \PP\{u_j < u_k\} = \int \PP \{u_j < u_k | u_k\} p(u_k) d u_k  \\ 
+            &= \int \prod_{j \neq k} \PP \{u_j < u_k\} p(u_k) d u_k = 
+            \left\{
+            \begin{array}{c}
+                u_k = x_k + \log p_k, \quad u_j = x_j + \log p_j, \\ 
+                x_j = u_j - \log p_j, \quad u_j < C \Leftrightarrow x_j < C - \log p_j
+            \end{array} 
+            \right\} \\ 
+            &= \int p_G (u_k - \log p_k) \prod_{j \neq k} F_G (u_k - \log p_k) d u_k  \\ 
+            &= \int \exp (- u_k + \log p_k - \exp (- u_k + \log p_k)) \prod_{j \neq k} \exp (- \exp (- u_k + \log p_k)) d u_k  \\ 
+            &= p_k \int \exp (- u_k - p_k \exp (- u_k)) \exp \left( - \sum_{j \neq k} p_j \exp (- u_k) \right) d u_k  \\ 
+            &= p_k \int \exp (- u_k - \sum_{j} p_j \exp (- u_k)) d u_k \\ 
+            &= p_k \int \exp (- u_k - \exp (- u_k)) d u_k = p_k.
+        \end{aligned}
+    \end{equation*}
+\end{proof}
+
+Let us now assume $z \in \{0, 1\}^K$ with $\sum z_j = 1$ and $\{u_1, \ldots, u_k\}$, where $u_j = \log p_j + x_j$ and $x_j \sim \operatorname{Gumbel}(x_j)$. Then we can write
+
+\begin{equation*}
+    \begin{aligned}
+        z_k = 
+        \begin{cases}
+            1, & \text{if } k = \argmax_j u_j, \\ 
+            0, & \text{otherwise}.
+        \end{cases}
+    \end{aligned}
+\end{equation*}
+
+Switching from categorical to continuous relaxation, we can write
+
+\begin{equation*}
+    \begin{aligned}
+        \widetilde{z_k} = \frac{\exp \left(\frac{u_k}{T} \right)}{\sum_j \exp \left(\frac{u_j}{T} \right)} = \texttt{softmax}(u_1, \ldots, u_k, T).
+    \end{aligned}
+\end{equation*}
+
+But what would be the distribution of $\widetilde{z}$? $\widetilde{z} \sim \operatorname{ConCrete}(\widetilde{z} | p)$. This distribution has some important properties: 
+
+\begin{enumerate}
+    \item $\PP\{\widetilde{z_k} > \widetilde{z_j}, \forall j \neq k\} = p_k$; 
+    \item $\PP\{\lim_{T \to 0} \widetilde{z_k} = 1\} = p_k$;
+    \item p.d.f is log-convex when $T < \frac{1}{K -1}$. 
+\end{enumerate}
+
+And the distribution is defined on convex hull of $p$. Let's consiter $K = 2$, then $z = \{0, 1\}$, $p = \PP\{z = 1\}$, $x_0, x_1 \sim \operatorname{Gumbel}$, $u_0 = \log (1-p) + x_0$, $u_1 = \log p + x_1$. Then we can write
+
+\begin{equation*}
+    \begin{aligned}
+        z = 1 \Leftrightarrow u_1 > u_0 \Leftrightarrow x_1 - x_0 > \log \frac{1-p}{p} \Leftrightarrow y > \log \frac{1-p}{p}, \quad y \sim \operatorname{Logistic}.
+    \end{aligned}
+\end{equation*}
+
+which is defined as $p(y) = \frac{1}{1 + \exp(-y)}$.
+
+% \subsection{GANs}
+
+% В GAN мы используем два вида лосса: 
+
+% \begin{enumerate}
+%     \item $\texttt{loss\_dis\_real} = - t_R \log \texttt{real} - (1 - t_R) \log (1 - \texttt{real})$;
+%     \item $\texttt{loss\_dis\_fake} = - t_F \log \texttt{fake} - (1 - t_F) \log (1 - \texttt{fake})$.
+% \end{enumerate}
+
+% которые в итоге дают нам лосс для дискриминатора $\texttt{loss\_dis} = - \log \texttt{real} - \log (1 - \texttt{fake})$ и лосс для генератора $\texttt{loss\_gen} = - \log \texttt{fake}$. И если говоить формально, то 
+
+% \begin{equation*}
+%     \begin{aligned}
+%         \eta &= \argmax_\eta \left[ \EE_{x_\texttt{real}} \log D(x) + \EE_{\varepsilon} \log (1 - D(G(\varepsilon))) \right]; \\
+%         \theta &= \argmax_\theta \left[ \EE_{\varepsilon} \log (D(G(\varepsilon))) \right]; \\ 
+%         \theta &= \argmin_\theta \left[ \EE_{\varepsilon} \log (1 - D(G(\varepsilon))) \right].
+%     \end{aligned}
+% \end{equation*}
+
+% В GAN мы используем Mode Collapse

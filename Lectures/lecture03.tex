@@ -1,5 +1,3 @@
-\subsection{Lecture}
-
 How does standard regularization works in Bayesian world?
 
 \begin{gather*}
@@ -24,15 +22,11 @@ Then dropout was introduced:
     n \frac{\partial}{\partial w} \log p(t_k, x_k, w \odot \eta) \qquad \eta \sim \operatorname{Ber}(\eta | 1 - p)
 \] 
 
-Dropout was just a heuristic and no-one understood why it worked. 
-
-Let's consider a simple model:
+Dropout was just a heuristic and no-one understood why it worked. Let's consider a simple model:
 \[ 
     y_i = \sum (w_{ij} \eta_{ij}) z_j
 \] 
-where $z_j$ is the input, $w_{ij}$ is the weight, and $\eta_{ij}$ is the Bernoulli mask.
-
-Statistics of $y$: 
+where $z_j$ is the input, $w_{ij}$ is the weight, and $\eta_{ij}$ is the Bernoulli mask. Statistics of $y$: 
 \[ 
     \EE y_i = \sum \overbrace{w_{ij} (1 - p)}^{\mu_{ij}} z_j = \sum \mu_{ij} z_j
 \] 
@@ -53,52 +47,46 @@ Before that we took the Bernoullean noize. Let's consider a situation when we ta
 \]
 
 Statistics would be: 
-\begin{align*}
-    &\EE y_i = \sum \mu_{ij} z_j
-    &\DD y_i = \sum \alpha \mu_{ij}^2 z_j^2
-\end{align*} 
+\[
+    \EE y_i = \sum \mu_{ij} z_j, \qquad \DD y_i = \sum \alpha \mu_{ij}^2 z_j^2
+\]
 
-Thus we can take $\alpha = \frac{p}{1 - p}$ and we get the same statistics. From now on we will consider the Gaussian noize, just because it is easier to work with.
-
-And how do we find the right value for $\alpha$/ $p$? How do we find a good value for the dropout rate?
+Thus we can take $\alpha = \frac{p}{1 - p}$ and we get the same statistics. From now on we will consider the Gaussian noize, just because it is easier to work with. And how do we find the right value for $\alpha$/ $p$? How do we find a good value for the dropout rate?
 \begin{align*}
-    \LL (\mu) &= \int q(\delta | \alpha) \sum_{i = 1}^n \log p(t_i | x_i, \mu \odot \delta) d \delta \\ 
-    &= \{ w = \mu \odot \delta \} \\
+    \ML (\mu) &= \int q(\delta | \alpha) \sum_{i = 1}^n \log p(t_i | x_i, \mu \odot \delta) d \delta = \{ w = \mu \odot \delta \} \\
     &= \int q(w | \mu, \alpha) \log p(T | X, w) d w \to \max_{\mu} \\ 
     &= \bigstar  
 \end{align*}
-Now think of the following: What if we make our model Bayesian? If we find such prior $p(w)$ that $KL(q(w | \mu, \alpha) || p(w)) = f(\alpha)$, then: 
+Now think of the following: what if we make our model Bayesian? If we find such prior $p(w)$ that $\operatorname{KL}(q(w | \mu, \alpha) || p(w)) = f(\alpha)$, then: 
 
 \begin{align*}
     \bigstar &\sim \int q(w | \mu, \alpha) \log p(T | X, w) d w - KL(q(w | \mu, \alpha) || p(w)) \to \max_{\mu, \alpha} 
 \end{align*}
 
 Let's interpret the model as a Bayesian model. 
-\[ 
-    p(w | \lambda) = \prod_{l} \mathcal{N} (w_l | 0, \lambda_l^{2})
-\] 
-
-\[ 
-    \int q(w | \mu, \alpha) \log p(T | X, w) d w - \sum_l KL (q(w_l | \mu_l, \alpha_l) || p(w_l | \lambda_l)) \to \max_{\mu, \alpha}
-\] 
+\begin{equation*}
+    \begin{aligned}
+        p(w | \lambda) &= \prod_{l} \mathcal{N} (w_l | 0, \lambda_l^{2}) \\ 
+        \int q(w | \mu, \alpha) \log p(T | X, w) d w &- \sum_l KL (q(w_l | \mu_l, \alpha_l) || p(w_l | \lambda_l)) \to \max_{\mu, \alpha}
+    \end{aligned}
+\end{equation*}
 
 The KL divergence can be computed in closed form:
 \[ 
-    KL(\mathcal{N} (w_l | \mu_l, \alpha_l \mu_l^2) || \mathcal{N} (w_l | 0, \lambda_l^2)) = \log \frac{\lambda_l}{\sqrt{\alpha_l} \mu_l} + \frac{\mu_l^2 + \alpha_l \mu_l^2}{2 \lambda_l^2} 
+    \operatorname{KL}(\mathcal{N} (w_l | \mu_l, \alpha_l \mu_l^2) || \mathcal{N} (w_l | 0, \lambda_l^2)) = \log \frac{\lambda_l}{\sqrt{\alpha_l} \mu_l} + \frac{\mu_l^2 + \alpha_l \mu_l^2}{2 \lambda_l^2} 
 \]
 
 We can integrate this with respect to $\lambda_l$: 
-\begin{align*}
-    &\frac{1}{\lambda_l} - \frac{\mu_l^2 + \alpha_l \mu_l^2}{\lambda_l^3} = 0 
-    &(\lambda_l^*)^2 = \mu_l^2 + \alpha_l \mu_l^2
-\end{align*}
+\[
+    \frac{1}{\lambda_l} - \frac{\mu_l^2 + \alpha_l \mu_l^2}{\lambda_l^3} = 0, \qquad (\lambda_l^*)^2 = \mu_l^2 + \alpha_l \mu_l^2
+\]
 
 If we substitute this optimal value to the KL divergence: 
 \[
     \frac{1}{2} \log \frac{\mu_l^2 + \alpha_l \mu_l^2}{\alpha \mu_l^2} + \frac{\mu_l^2 + \alpha_l \mu_l^2}{2 (\mu_l^2 + \alpha_l \mu_l^2)} = \frac{1}{2} \log \frac{\alpha + 1}{\alpha} + \frac{1}{2}
 \] 
 
-We got that we can now only optimize the function with respect to $\alpha$, yet, get the same thing as we would have had in the standard dropout. We interpreted the model as a Bayesian model and now have an algorithm to automatically tune the dropout rate.
+We got that we can now only optimize the function with respect to $\alpha$, yet, get the same thing as we would have had in the standard dropout. We interpreted the model as a Bayesian model and now have an algorithm to automatically tune the dropout rate. \\ 
 
 Later on we decided to take $\alpha_l$ instead of $\alpha$, so we get a different value for each weight. And we got the same results. 
 

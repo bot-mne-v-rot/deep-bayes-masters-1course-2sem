@@ -1,0 +1,87 @@
+Consider that we look at $\operatorname{KL}(p || q)$ between a quite complicated $p(x)$ and gaussian $q(x)$. The area of interest consists of the points, where $p(x)$ is sufficiently large (as at the points, where $p(x)$ is small, the $\operatorname{KL}$-divergence is small) and vice-versa. So that we obtain a problem of mode-collapse, as we would generate almost surely points, where $p(x)$ is large, but not the other representatives. VAE suffers from realism, but deals with mass-coverage, and Diffusion Models deal with both of the problems. \\ 
+
+By construction, in DM we have no mismatch gap: 
+\[ 
+    \frac{1}{n} \sum_{i=1}^n q(z | x_i) = p(z) 
+\]
+However, the problem is that the generation is pretty small, as we <<walk through>> Score Estimator $T$ times before we reach the target distribution. Today we will talk about how to accelerate the process of DM. \\ 
+
+Let us breifly remind what are Diffusion Models. Lwt's say that we have a stochastic differential equation, forward SDE: 
+\[
+    dx = -\frac{\beta}{2} x dt + \sqrt{\beta} dW
+\]
+with $x_0 \sim p_0(\cdot) \to p_T(\cdot )$. Also, we have a backward SDE:
+\[
+    dx = \left( -\frac{\beta}{2 - \beta s_\theta(x, t)} \right) dt + \sqrt{\beta} dW
+\]
+with $s_\theta(x, t) =^{def} \frac{\partial}{\partial x} \log p_t(x)$ and $x_T \sim p_T(\cdot) \to p_0(\cdot)$. Equivalent ODE looks like 
+\[
+    dx = \underbrace{\left( -\frac{\beta}{2} - \frac{\beta}{2} s_\theta(x, t) \right)}_{f(x, t)} dt + \sqrt{\beta} dW.
+\]
+\begin{eremark}
+    Usage of first two is calles DDPM and the last one is called DDIM.
+\end{eremark}
+
+\subsection{Consistency Distillation}
+
+If we have trained Diffusion Models, we have access to two things: Score Function and drift term, $f(x, t)$. So what if we try fo train integrator: 
+\[
+    F_\varphi(x, t) =^{def} \int_t^0 f(x, \tau) d \tau, \quad \text{ such that } x_t = x.
+\]
+And if we suppose that we somehow learned it. So then in one step we can just take $\varepsilon \sim \NN(\varepsilon | 0, I)$, $F_\varphi(\varepsilon, T) = x_0$. Hence, 
+\[
+    x_0 = \int_T^0 f(x, \tau) d \tau, \quad x_T = \varepsilon.
+\]
+TODO: insert the picture. \\
+
+We have the first point $F_{\varphi} (x_t, t)$ and the second point $F_\varphi(x_t - f(x_t, t)\delta t, t - \delta t)$, which is a <<previous step>>. So let's assume 
+\[ 
+    || F_{\varphi} (x_t, t) - F_\varphi(x_t - f(x_t, t)\delta t, t - \delta t) ||^2 \to \min_{\varphi}
+\]
+such that $F_{\varphi}(x, 0) = x$. We take $\delta t$ same as in diffusion model and surprisingly, this training performs surprisingly well. \\ 
+
+Considering K-step generation, we have
+\begin{equation*}
+    \begin{aligned}
+        &x_T \sim \NN(x_T | 0, I) \quad t_k = \frac{k}{K} T \\ 
+        &\text{for } k = K \ldots 1: \\ 
+        & \quad &x_0 = F_{\varphi}(x_{t_k}, t_k) \\
+        & \quad &x_{t_{k-1}} = \sqrt{\overline{\alpha_{t_{k-1}}}} + \sqrt{1 - \overline{\alpha_{t_{k-1}}}} \varepsilon \\
+        &\text{return } x_0
+    \end{aligned}
+\end{equation*}
+
+\subsection{Distribution Matching Distillation}
+
+Suppose we once again have pre-trined model $p_T \to p_0$ and we have access to the score function $s_\theta(x, t)$. So that we have generator
+\[ 
+    G_\varphi : \NN(\varepsilon | 0, I) \to q_0
+\]
+and 
+\[
+    \sum_{t = 0}^{T - 1} \operatorname{KL}(q_t || p_t) = \LL(\varphi)
+\]
+so then 
+\begin{equation*}
+    \begin{aligned}
+        \LL (\varphi) &= \sum_{t = 0}^{T} \int q_t(x) \log \frac{q_t(x)}{p_t(x)} d x_t = \sum_{t = 1}^n \int r(\varepsilon) \int q_t(x_t | G_\varphi(\varepsilon)) \log \frac{q_t(x_t)}{p_t(x_t)} d x_t d \varepsilon = \\ 
+        &\left\{ x_t = \sqrt{\overline{\alpha_t}} x_0 + \sqrt{1 - \overline{\alpha_t}} \delta (\text{where } \delta \sim \NN(\delta | 0, I)) = \sqrt{\overline{\alpha_t}} G_\varphi(\varepsilon) + \sqrt{1 - \overline{\alpha_t}} \delta = g(\varepsilon, \delta, t, \varphi)\right\} \\
+        &= \sum_{t = 1}^T \int r(\varepsilon) \int q_t(g(\varepsilon, \delta, t, \varphi)) \log \frac{q_t(g(\varepsilon, \delta, t, \varphi))}{p_t(g(\varepsilon, \delta, t, \varphi))} d \delta d \varepsilon
+    \end{aligned}
+\end{equation*}
+and 
+\begin{equation*}
+    \begin{aligned}
+        \frac{\partial \LL}{\partial \varphi} \approx \frac{\partial}{\partial \varphi} \left[ \log q_t(g(\widehat{\varepsilon}, \widehat{\delta}, \widehat{t}, \varphi)) - \log p_t(g(\widehat{\varepsilon}, \widehat{\delta}, \widehat{t})) \right] = \\ 
+        \left( \underbrace{\frac{\partial}{\partial g} \log q_t(g (\widehat{\varepsilon}, \widehat{\delta}, \widehat{t}, \varphi))}_{s_\eta(g, \widehat{t})} - \underbrace{\frac{\partial}{\partial g} \log p_t(g(\widehat{\varepsilon}, \widehat{\delta}, \widehat{t}))}_{s_\theta(g, \widehat{t})} \right) \frac{\partial g (\widehat{\varepsilon}, \widehat{\delta}, \widehat{t}, \varphi)}{\partial \varphi} = \\ 
+        \left( s_\eta(g (\widehat{\varepsilon}, \widehat{\delta}, \widehat{t}), \widehat{t}) - s_\theta(g(\widehat{\varepsilon}, \widehat{\delta}, \widehat{t}), \widehat{t}) \right) \sqrt{\overline{\alpha_{\widehat{t}}} \frac{\partial G_\varphi(\widehat{\varepsilon})}{\partial \varphi}}
+    \end{aligned}
+\end{equation*}
+which is how we do backpropagation. This scheme produces quite good samples, but because of that formula with KL in the beginning, it suffers from mode-collapse. \\ 
+
+To fix this, let's introduce 
+\[ 
+    T(\varphi) = \LL(\varphi) + \lambda \sum_{i = 1}^n || G_\varphi(\varepsilon_i) - x_i ||^2 \to \min_{\varphi}
+\]
+so that if we would have quite diverse set $(\varepsilon_i, x_i)_{i = 1}^m$, it should <<contain>> them. 
+

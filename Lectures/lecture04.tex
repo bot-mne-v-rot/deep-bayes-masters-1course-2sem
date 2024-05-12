@@ -1,114 +1,161 @@
-\subsection{Lecture}
-
 \[
-x \in \RR^n, z \in \RR^d, X = (x_1, x_2, \ldots, x_n)
-.\]
+    x \in \RR^n, z \in \RR^d, X = (x_1, x_2, \ldots, x_n),
+\]
 \[
-p(x,z \mid \theta) = p(x \mid z, \theta) p(z) = N(x \mid \mu + Wz, \sigma^2 I) N(z \mid 0, I)
+    p(x,z \mid \theta) = p(x \mid z, \theta) p(z) = \MN (x \mid \mu + Wz, \sigma^2 I) \MN (z \mid 0, I)
 .\]
 Maximum likelihood
 \[
-\theta_{ML} = \argmax_\theta p(X\mid \theta) = 
-\argmax_\theta \prod_{i=1}^n p(x_i \mid \theta)
+    \theta_{ML} = \argmax_\theta p(X\mid \theta) = 
+    \argmax_\theta \prod_{i=1}^n p(x_i \mid \theta)
 .\]
 
-An alternative is EM algorithm.
-E-step: $p(Z \mid X, \theta) =\prod_{i=1}^n p(z_i \mid x_i, \theta)$.
-M-step: $\mathbb{E}_{z_i \mid x_i, \theta} \log p(X, Z \mid \theta) \to \max_{\theta}$.
+An alternative is EM algorithm:
+\begin{equation*}
+    \begin{aligned}
+        \text{E-step:} \quad &p(Z \mid X, \theta) =\prod_{i=1}^n p(z_i \mid x_i, \theta), \\ 
+        \text{M-step:} \quad &\mathbb{E}_{z_i \mid x_i, \theta} \log p(X, Z \mid \theta) \to \max_{\theta}.
+    \end{aligned}
+\end{equation*}
 
-This is a generative model: we sample $z \sim N(z \mid 0, I)$, then $N(x \mid \mu + Wz, \sigma^2 I)$.
-It's a very simple one; we generalize it by taking 
+This is a generative model: we sample $z \sim \MN (z \mid 0, I)$, then $\MN (x \mid \mu + Wz, \sigma^2 I)$. It's a very simple one; we generalize it by taking 
 \[
-p(x,z \mid \theta) = p(x \mid z, \theta) p(z) = N(x \mid \mu(z, \theta), \operatorname{diag}(\sigma^2(z, \theta)) N(z \mid 0, I)
-.\]
-where $\sigma$ and $\mu$ are deep neural networks.
-How can we then train $\sigma$ and $\mu$? Using Variation Bayesian Inference and ELBO.
+    p(x,z \mid \theta) = p(x \mid z, \theta) p(z) = \MN(x \mid \mu(z, \theta), \operatorname{diag}(\sigma^2(z, \theta))) \MN (z \mid 0, I),
+\]
+where $\sigma$ and $\mu$ are deep neural networks. How can we then train $\sigma$ and $\mu$? Using Variation Bayesian Inference and ELBO.
 
 \[
-\log p(X \mid \theta) = \sum_{i=1}^{n} \log p(x_i \mid \theta) \ge
-\sum_{i=1}^{n} \int q(z\mid \phi) \log \frac{p(x_i, z_i \mid \theta)}{q(z_i \mid \phi)} \dd z_i
-.\]
+    \log p(X \mid \theta) = \sum_{i=1}^{n} \log p(x_i \mid \theta) \ge
+    \sum_{i=1}^{n} \int q(z\mid \varphi) \log \frac{p(x_i, z_i \mid \theta)}{q(z_i \mid \varphi)} \dd z_i
+\]
 \[
-q(z_i \mid \phi) =
-\argmin_{\phi} KL(q(z_i \mid \phi) || p(z_i \mid x_i, \theta)) \approx p(z_i \mid x_i, \theta)
+    q(z_i \mid \varphi) =
+    \argmin_{\varphi} \operatorname{KL}(q(z_i \mid \varphi) || p(z_i \mid x_i, \theta)) \approx p(z_i \mid x_i, \theta)
 .\]
 
-Given a particular sample $x_k$, we can sample $z_k$ from the posterior $q(z \mid \phi) \approx p(z \mid x_k, \theta)$.
+Given a particular sample $x_k$, we can sample $z_k$ from the posterior $q(z \mid \varphi) \approx p(z \mid x_k, \theta)$.
 And then use $z_k$ to sample from $p(x\mid z_k, \theta)$.
-This means we can solve the problem of generating $x$s that are similar to a given sample $x_k$ after the training of our generative model is complete (we have the approximate posterior).
+This means we can solve the problem of generating $x$s that are similar to a given sample $x_k$ after the training of our generative model is complete (we have the approximate posterior). \\ 
 
 $x_k$ has to come from the training data, we can't generate samples similar to a completely new $x$.
-For every sample $x_i$, we have its own set of parameters $\phi_i = (m_i, s_i)$ where $q(z_i\mid \phi) = N(m_i, \operatorname{diag}(s_i^2))$.
-
-\cursed{Amortized VI}
+For every sample $x_i$, we have its own set of parameters $\varphi_i = (m_i, s_i)$ where $q(z_i\mid \varphi) = \MN(m_i, \operatorname{diag}(s_i^2))$. \textit{Amortized VI}:
 \[
-q(z_i \mid x_i, \phi) = N(z_i \mid m(x_i, \phi) \operatorname{diag}(s^2(x_i, \phi))
+    q(z_i \mid x_i, \varphi) = N(z_i \mid m(x_i, \varphi) \operatorname{diag}(s^2(x_i, \varphi)))
 .\]
 
-TODO: picture of VAE with encoder-decoder and latent representation in between.
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[
+        scale=2,
+        node distance=2cm,
+        auto,
+        trapezoid/.style={
+            draw,
+            trapezium,
+            trapezium stretches,
+            shape aspect=0.8,
+            minimum height=2cm,
+            minimum width=4cm,
+            trapezium left angle=70,
+            trapezium right angle=70,
+        },
+        box/.style={
+            draw,
+            rectangle,
+            minimum height=1.2cm,
+            minimum width=2cm,
+        },
+        rect/.style={
+            draw,
+            rectangle,
+            minimum height=4cm,
+            minimum width=1cm,
+        },
+        arrow/.style={
+            -latex,
+            thick
+        }
+    ]
+
+    \node[rect] (data) {Data};
+    \node[trapezoid, shape border rotate=270, right of=data, node distance=3cm] (encoder) {Encoder};
+    \node[box, right of=encoder, node distance=4cm] (latent) {Latent Representation};
+    \node[trapezoid, shape border rotate=90, right of=latent, node distance=4cm] (decoder) {Decoder};
+    \node[rect, right of=decoder, node distance=3cm] (output) {Output};
+
+    \draw[arrow] (data) -- (encoder);
+    \draw[arrow] (encoder) -- (latent);
+    \draw[arrow] (latent) -- (decoder);
+    \draw[arrow] (decoder) -- (output);
+
+    \end{tikzpicture}
+\end{figure}
 
 \begin{multline*}
-L(\theta, \phi) =
-\sum_{i=1}^{n} \int q(z_i \mid x_i, \phi)
-\log \frac{p(x_i, z_i \mid \theta)}{q(z_i \mid x_i, \phi)} \dd z_i =\\
-\sum_{i=1}^{n} \left[ \int q(z_i \mid x_i, \phi) \log p(x_i \mid z_i, \theta) \dd z_i +
-\underbrace{\int q(z_i \mid x_i, \phi) \log \frac{p(z)}{q(z_i \mid x_i, \phi)} \dd z_i}_{-KL(q(z_i \mid x_i, \phi) || p(z_i))} \right]
+   \ML(\theta, \varphi) =
+    \sum_{i=1}^{n} \int q(z_i \mid x_i, \varphi)
+    \log \frac{p(x_i, z_i \mid \theta)}{q(z_i \mid x_i, \varphi)} \dd z_i =\\
+    \sum_{i=1}^{n} \left[ \int q(z_i \mid x_i, \varphi) \log p(x_i \mid z_i, \theta) \dd z_i +
+    \underbrace{\int q(z_i \mid x_i, \varphi) \log \frac{p(z)}{q(z_i \mid x_i, \varphi)} \dd z_i}_{-\operatorname{KL}(q(z_i \mid x_i, \varphi) || p(z_i))} \right]
 \end{multline*}
-\begin{multline*}
-\pdv{\theta} L(\theta, \phi) =
-\pdv{\theta} \sum_{i=1}^{n} \left[ \int q(z_i \mid x_i, \phi) \log p(x_i \mid z_i, \theta) \dd z_i \right]
-\approx \\
-n \pdv{\theta} \log p(x_j \mid \hat{z}, \theta)
-\text{ where } j \sim U \{1, \ldots, n\} \text{ and } z \sim q(z_j \mid x_j, \phi)
+
+\begin{equation*}
+    \begin{aligned}
+        \pdv{\theta}\ML(\theta, \varphi) =
+        &\pdv{\theta} \sum_{i=1}^{n} \left[ \int q(z_i \mid x_i, \varphi) \log p(x_i \mid z_i, \theta) \dd z_i \right]
+        \approx \\
+        n &\pdv{\theta} \log p(x_j \mid \hat{z}, \theta)
+        \text{ where } j \sim U \{1, \ldots, n\} \text{ and } z \sim q(z_j \mid x_j, \varphi) \\ 
+        \\
+        \pdv{\varphi}\ML(\theta, \varphi) =
+        &\pdv{\theta} \sum_{i=1}^{n} \left[
+            \int q(z_i \mid x_i, \varphi) \log p(x_i \mid z_i, \theta) \dd z_i
+            -\operatorname{KL}(q(z_i \mid x_i, \varphi) || p(z_i))
+        \right] \approx \\ 
+        n &\pdv{\varphi} \log p(x_j \mid g(\widehat{\varepsilon}, \varphi), \theta) - n \pdv{\varphi} \operatorname{KL}( \ldots ) \text{ where } \widehat{\varepsilon} \sim \MN(0, I)
+    \end{aligned}
+\end{equation*}
+
+$q$ depends on $\varphi$, so we can't differentiate directly, need \texttt{REINFORCE} or reparametrisation trick.
+We take $z_i = g(\varepsilon, x_i, \varphi)$ where $\varepsilon \sim r(\varepsilon)$.
+    \begin{multline*}
+    ? = \pdv{\varphi} \sum_{i=1}^{n} \left[
+        \int r(\varepsilon) \log p(x_i \mid g(\varepsilon, x_i, \varphi), \theta) \dd z_i
+        -\operatorname{KL}(q(z_i \mid x_i, \varphi) || p(z_i))
+    \right] =\\ n \pdv{\varphi} \log p(x_j \mid g(\varepsilon, x_j, \varphi), \theta) 
+    - n \pdv{\varphi} \operatorname{KL}(q(z_j \mid x_j, \varphi) || p(z_j)) = ? 
 \end{multline*}
 
-\[
-\pdv{\phi} L(\theta, \phi) =
-\pdv{\theta} \sum_{i=1}^{n} \left[
-    \int q(z_i \mid x_i, \phi) \log p(x_i \mid z_i, \theta) \dd z_i
-    -KL(q(z_i \mid x_i, \phi) || p(z_i))
-\right] = ???
-\]
-$q$ depends on $\phi$, so we can't differentiate directly, need REINFORCE or reparametrisation trick.
-We take $z_i = g(\epsilon, x_i, \phi)$ where $\epsilon \sim r(\epsilon)$.
-\begin{multline*}
-??? = \pdv{\phi} \sum_{i=1}^{n} \left[
-    \int r(\epsilon) \log p(x_i \mid g(\epsilon, x_i, \phi), \theta) \dd z_i
-    -KL(q(z_i \mid x_i, \phi) || p(z_i))
-\right] =\\ n \pdv{\phi} \log p(x_j \mid g(\epsilon, x_j, \phi), \theta) 
-- n \pdv{\phi} KL(q(z_j \mid x_j, \phi) || p(z_j)) =\\
-.\end{multline*}
+Now that we have stochastic gradients, we can train our VAE, both the encoder $q(z \mid x, \varphi)$ and the decoder $p(x \mid z, \theta)$. \\ 
 
-Now that we have stochastic gradients, we can train our VAE, both the encoder $q(z \mid x, \phi)$ and the decoder $p(x \mid z, \theta)$.
-
-The first term in the expression for $L(\theta, \phi)$, aka ELBO, corresponds to reconstruction error.
-We thus require low reconstruction error on every training sample and prevent mode collapse problem, which GANs are prone to.
+The first term in the expression for $\ML(\theta, \varphi)$, aka ELBO, corresponds to reconstruction error.
+We thus require low reconstruction error on every training sample and prevent mode collapse problem, which GANs are prone to. \\ 
 
 The second term (KL divergence) requires our approximate posterior $q$ to be not too far from the prior $p(z)$.
 Without it, $q$ would converge to a delta function corresponding to MLE value for $z$ that maximizes $p(x\mid z, \theta)$, so this term mandates that the $q$ gaussians are not too narrow.
-Also, without it inference (generation) and training would be too different, because during training we sample $z$s from $q$, but during training we don't use the encoder and only use the decoder, which receives $z$s from the prior $z$.
-In order to make this work, $q$ must not be not too far from the prior.
+Also, without it inference (generation) and training would be too different, because during training we sample $z$s from $q$, but during training we don't use the encoder and only use the decoder, which receives $z$s from the prior $z$. 
+In order to make this work, $q$ must not be not too far from the prior. \\ 
 
 New idea. Take $x = f(z, \theta)$ to be a neural network which is invertible for each value of its parameters $\theta$.
 Take a training sample:
 \[
-x \in \RR^D, z \in \RR^D, X = (x_1, x_2, \ldots, x_n)
+    x \in \RR^D, z \in \RR^D, X = (x_1, x_2, \ldots, x_n)
 .\]
 Consider the likelihood:
 \[
-\log p(X \mid \theta) = \sum_{i=1}^{n} \log p(x_i \mid \theta) = 
-\sum_{i=1}^{n} \left[ p_z(f^{-1}(x_i, \theta)) + \log\abs{\det \dv{f^{-1}(x_i, \theta)}{x_i}} \right]
+    \log p(X \mid \theta) = \sum_{i=1}^{n} \log p(x_i \mid \theta) = 
+    \sum_{i=1}^{n} \left[ p_z(f^{-1}(x_i, \theta)) + \log\abs{\det \dv{f^{-1}(x_i, \theta)}{x_i}} \right]
 .\]
 It takes $O(D^3)$ to calculate the determinant, too inefficient.
 To remedy this, assume $x=f(z, \theta) = f_{\tau}(f_{\tau-1}(\ldots, f_1(z, \theta), \theta), \theta)$ where $f_{\tau}$ are relatively simple.
 Then the $\log\det$ term decomposes into a sum of cheap-to-compute terms:
 \[
-\log\abs{\det \dv{f^{-1}(x_i, \theta)}{x_i}} = \sum_{\tau=1}^{T} \ldots
-.\]
+    \log\abs{\det \dv{f^{-1}(x_i, \theta)}{x_i}} = \sum_{\tau=1}^{T} \ldots
+\]
 Two possible options to choose the form of $f_{\tau}$
 \begin{itemize}
-\item simple transformations aka Normalizing flow (jacobian takes $O(D)$ to calculate)
-\item slight transformations aka NeuroODE (also kinda $O(D)$)
+    \item simple transformations aka Normalizing flow (jacobian takes $O(D)$ to calculate)
+    \item slight transformations aka NeuroODE (also kinda $O(D)$)
 \end{itemize}
 
 \subsection{Seminar}

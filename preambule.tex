@@ -3,6 +3,9 @@
 \usepackage[12pt]{extsizes}
 \usepackage[utf8]{inputenc}
 \usepackage[unicode, pdftex]{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows, positioning}
+\usepackage{pgfplots}
 \usepackage{cmap}
 \usepackage{textcomp}
 \usepackage{mathtext}
@@ -16,7 +19,7 @@
 \usepackage{euscript}
 \usepackage{physics}
 \usepackage{mathrsfs}
-\usepackage[dvipsnames]{xcolor}
+%\usepackage[dvipsnames]{xcolor}
 \usepackage[left=2cm,right=2cm,
     top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
 \usepackage[normalem]{ulem}
@@ -25,6 +28,10 @@
 \usepackage{extarrows}
 \usepackage[shortlabels]{enumitem}
 \usepackage{listings}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
 \makeindex
 \graphicspath{{pictures/}}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
@@ -88,6 +95,8 @@
 \DeclareMathOperator{\Rho}{\mathcal{P}}
 \DeclareMathOperator{\FF}{\mathcal{F}}
 \DeclareMathOperator{\MI}{\mathcal{I}}
+\DeclareMathOperator{\ML}{\mathcal{L}}
+\DeclareMathOperator{\MN}{\mathcal{N}}
 %common_shit
 \DeclareMathOperator{\Ker}{Ker}
 \DeclareMathOperator{\spann}{span}
